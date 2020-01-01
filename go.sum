@@ -24,6 +24,7 @@ github.com/bsm/sarama-cluster v2.1.15+incompatible/go.mod h1:r7ao+4tTNXvWm+VRpRJ
 github.com/burdiyan/kafkautil v0.0.0-20190131162249-eaf83ed22d5b h1:gRFujk0F/KYFDEalhpaAbLIwmeiDH53ZgdllJ7UHxyQ=
 github.com/burdiyan/kafkautil v0.0.0-20190131162249-eaf83ed22d5b/go.mod h1:5hrpM9I1h0fZlTk8JhqaaBaCs76EbCGvFcPtm5SxcCU=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
+github.com/chzyer/logex v1.1.10 h1:Swpa1K6QvQznwJRcfTfQJmTE72DqScAa40E+fbHEXEE=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e h1:fY5BOSpyZCqRo5OhCuC+XN+r/bBCmeuuJtjz+bCNIf8=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
