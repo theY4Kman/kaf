@@ -21,10 +21,18 @@ var cfgFile string
 
 func getConfig() (saramaConfig *sarama.Config) {
 	saramaConfig = sarama.NewConfig()
-	saramaConfig.Version = sarama.V1_1_0_0
+	// Use an old version of the protocol by default, for widest support
+	saramaConfig.Version = sarama.V0_10_0_0
 	saramaConfig.Producer.Return.Successes = true
 
 	cluster := currentCluster
+	if cluster.Version != "" {
+		parsedVersion, err := sarama.ParseKafkaVersion(cluster.Version)
+		if err != nil {
+			errorExit("Unable to parse Kafka version: %v\n", err)
+		}
+		saramaConfig.Version = parsedVersion
+	}
 	if cluster.SASL != nil {
 		saramaConfig.Net.SASL.Enable = true
 		saramaConfig.Net.SASL.User = cluster.SASL.Username
