@@ -129,6 +129,7 @@ var (
 	protoFiles        []string
 	protoExclude      []string
 	verbose           bool
+	jsonFlag          bool
 	clusterOverride   string
 )
 
@@ -137,6 +138,7 @@ func init() {
 	rootCmd.PersistentFlags().StringSliceVarP(&brokersFlag, "brokers", "b", nil, "Comma separated list of broker ip:port pairs")
 	rootCmd.PersistentFlags().StringVar(&schemaRegistryURL, "schema-registry", "", "URL to a Confluent schema registry. Used for attempting to decode Avro-encoded messages")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Whether to turn on sarama logging")
+	rootCmd.PersistentFlags().BoolVar(&jsonFlag, "json", false, "Whether to print results as JSON")
 	rootCmd.PersistentFlags().StringVarP(&clusterOverride, "cluster", "c", "", "set a temporary current cluster")
 	cobra.OnInitialize(onInit)
 }
