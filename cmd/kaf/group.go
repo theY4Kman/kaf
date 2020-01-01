@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -238,6 +239,28 @@ var groupLsCmd = &cobra.Command{
 	},
 }
 
+type groupMemberMetadata struct {
+	Type         string `json:"type"`
+	UserData     string `json:"user_data,omitempty"`
+	UUID         string `json:"uuid,omitempty"`
+	UserEndpoint string `json:"user_endpoint,omitempty"`
+}
+
+type groupMemberDescription struct {
+	ClientId   string              `json:"client_id"`
+	ClientHost string              `json:"client_host"`
+	Topics     map[string][]int32  `json:"assignments"`
+	Metadata   groupMemberMetadata `json:"metadata"`
+}
+
+type groupDescription struct {
+	GroupId      string                   `json:"group_id"`
+	State        string                   `json:"state"`
+	Protocol     string                   `json:"protocol"`
+	ProtocolType string                   `json:"protocol_type"`
+	Members      []groupMemberDescription `json:"members"`
+}
+
 var groupDescribeCmd = &cobra.Command{
 	Use:   "describe",
 	Short: "Describe consumer group",
@@ -259,6 +282,63 @@ var groupDescribeCmd = &cobra.Command{
 
 		if group.State == "Dead" {
 			fmt.Printf("Group %v not found.\n", args[0])
+			return
+		}
+
+		if jsonFlag {
+			members := make([]groupMemberDescription, len(group.Members))
+			i := 0
+			for _, member := range group.Members {
+				members[i].ClientId = member.ClientId
+				members[i].ClientHost = member.ClientHost
+
+				assignment, err := member.GetMemberAssignment()
+				if err == nil {
+					members[i].Topics = assignment.Topics
+				}
+
+				metadata, err := member.GetMemberMetadata()
+				if err == nil {
+					decodedUserData, err := tryDecodeUserData(group.Protocol, metadata.UserData)
+
+					if err != nil {
+						if IsASCIIPrintable(string(metadata.UserData)) {
+							members[i].Metadata = groupMemberMetadata{
+								Type:     "text",
+								UserData: string(metadata.UserData),
+							}
+						} else {
+							members[i].Metadata = groupMemberMetadata{
+								Type:     "base64",
+								UserData: base64.StdEncoding.EncodeToString(metadata.UserData),
+							}
+						}
+					} else {
+						switch d := decodedUserData.(type) {
+						case kaf.SubscriptionInfo:
+							members[i].Metadata = groupMemberMetadata{
+								Type:         "subscription",
+								UUID:         hex.EncodeToString(d.UUID),
+								UserEndpoint: d.UserEndpoint,
+							}
+						}
+					}
+				}
+
+				i++
+			}
+
+			json, err := json.Marshal(&groupDescription{
+				GroupId:      group.GroupId,
+				State:        group.State,
+				Protocol:     group.Protocol,
+				ProtocolType: group.ProtocolType,
+				Members:      members,
+			})
+			if err != nil {
+				errorExit("Unable to serialize JSON: %v\n", err)
+			}
+			os.Stdout.Write(json)
 			return
 		}
 
