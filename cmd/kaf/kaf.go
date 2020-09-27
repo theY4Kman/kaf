@@ -26,8 +26,16 @@ func getConfig() (saramaConfig *sarama.Config) {
 	saramaConfig.Producer.Return.Successes = true
 
 	cluster := currentCluster
-	if cluster.Version != "" {
-		parsedVersion, err := sarama.ParseKafkaVersion(cluster.Version)
+
+	clusterVersion := ""
+	if versionOverride != "" {
+		clusterVersion = versionOverride
+	} else if cluster.Version != "" {
+		clusterVersion = cluster.Version
+	}
+
+	if clusterVersion != "" {
+		parsedVersion, err := sarama.ParseKafkaVersion(clusterVersion)
 		if err != nil {
 			errorExit("Unable to parse Kafka version: %v\n", err)
 		}
@@ -131,6 +139,7 @@ var (
 	verbose           bool
 	jsonFlag          bool
 	clusterOverride   string
+	versionOverride   string
 )
 
 func init() {
@@ -140,6 +149,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Whether to turn on sarama logging")
 	rootCmd.PersistentFlags().BoolVar(&jsonFlag, "json", false, "Whether to print results as JSON")
 	rootCmd.PersistentFlags().StringVarP(&clusterOverride, "cluster", "c", "", "set a temporary current cluster")
+	rootCmd.PersistentFlags().StringVar(&versionOverride, "cluster-version", "", "override the kafka cluster version")
 	cobra.OnInitialize(onInit)
 }
 
